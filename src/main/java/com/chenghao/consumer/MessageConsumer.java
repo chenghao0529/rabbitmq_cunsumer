@@ -2,6 +2,7 @@ package com.chenghao.consumer;
 
 import com.chenghao.domain.Person;
 import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
@@ -25,12 +26,13 @@ public class MessageConsumer {
             bindings = @QueueBinding(
                     value = @Queue(value="rabbitmq-consumer" , durable="true"),
                     exchange = @Exchange(value = "rabbitmq-test") ,
-                    key = "chenghao"
+                    key = {"chenghao","kewenjia"}
             )
     )
     //@Payload 代表运行时将消息反序列化后注入到后面的参数中
     public void handleMessage(@Payload Person person , Channel channel ,
-                              @Headers Map<String,Object> headers) {
+                              @Headers Map<String,Object> headers, Message message) {
+        System.out.println(message.getMessageProperties().getReceivedRoutingKey());
         System.out.println(person.getUsername() + "-" + person.getAge());
         //所有消息处理后必须进行消息的ack，channel.basicAck()
         Long tag = (Long)headers.get(AmqpHeaders.DELIVERY_TAG);
