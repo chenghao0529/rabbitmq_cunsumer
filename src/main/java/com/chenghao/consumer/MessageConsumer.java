@@ -24,12 +24,14 @@ public class MessageConsumer {
     //@RabbitListener注解用于声明式定义消息接受的队列与exhcange绑定的信息
     @RabbitListener(
             bindings = @QueueBinding(
-                    value = @Queue(value="rabbitmq-consumer" , durable="true"),
-                    exchange = @Exchange(value = "rabbitmq-test") ,
-                    key = {"chenghao","kewenjia"}
+                    value = @Queue(value="test" , durable="true"),
+                    exchange = @Exchange(value = "test") ,
+                    key = {"test"}
             )
     )
-    //@Payload 代表运行时将消息反序列化后注入到后面的参数中
+    /**
+     * @Payload 代表运行时将消息反序列化后注入到后面的参数中
+     */
     public void handleMessage(@Payload Person person , Channel channel ,
                               @Headers Map<String,Object> headers, Message message) {
         System.out.println(message.getMessageProperties().getReceivedRoutingKey());
@@ -40,6 +42,11 @@ public class MessageConsumer {
             //false表示不批量接收
             channel.basicAck(tag , false);
         } catch (IOException e) {
+            try {
+                channel.basicReject(tag,false);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
